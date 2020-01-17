@@ -1,6 +1,7 @@
 import requests
 from tkinter import font
 import tkinter as tk
+from PIL import Image, ImageTk
 
 HEIGHT = 700
 WIDTH = 800
@@ -31,10 +32,21 @@ def get_weather(city):
     url = 'https://api.openweathermap.org/data/2.5/weather'
     params = {'APPID': weather_key, 'q': city, 'units': 'metric'}
     response = requests.get(url, params=params)
+    print(response.json())
     weather = response.json()
 
-    label['text'] = format_response(weather)
+    icon_name = weather['weather'][0]['icon']
+    print(icon_name)
 
+    label['text'] = format_response(weather)
+    open_image(icon_name)
+
+def open_image(icon):
+    size = int(lower_frame.winfo_height()*0.25)
+    img = ImageTk.PhotoImage(Image.open('./img/'+icon+'.png').resize((size, size)))
+    weather_icon.delete("all")
+    weather_icon.create_image(0,0, anchor='nw', image=img)
+    weather_icon.image = img
 
 root = tk.Tk()
 
@@ -43,7 +55,7 @@ canvas.pack()
 
 background_image = tk.PhotoImage(file='./img/landscape.png')
 background_label = tk.Label(root, image=background_image)
-background_label.place(x=0, y=0, relwidth=1, relheight=1)
+background_label.place(relwidth=1, relheight=1)
 
 frame = tk.Frame(root, bg='#80c1ff', bd=5)
 frame.place(relx=0.5, rely=0.1, relwidth=0.75, relheight=0.1, anchor='n')
@@ -57,8 +69,12 @@ button.place(relx=0.7, relwidth=0.3, relheight=1)
 lower_frame = tk.Frame(root, bg='#80c1ff', bd=10)
 lower_frame.place(relx=0.5, rely=0.25, relwidth=0.75, relheight=0.6, anchor="n")
 
-label = tk.Label(lower_frame, font=('Courier', 30))
+label = tk.Label(lower_frame, font=('Courier', 28))
 label.place(relwidth=1, relheight=1)
+
+
+weather_icon = tk.Canvas(label, bd=0, highlightthickness=0)
+weather_icon.place(relx=0.8, rely=0, relwidth=0.198, relheight=0.3)
 
 
 root.mainloop()
